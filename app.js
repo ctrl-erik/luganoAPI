@@ -1,9 +1,9 @@
 import express from 'express'
 import cors from 'cors'
+import pool from './config/db.js';
+
 const app = express();
-app.use(cors({
-    origin: ['http://localhost:3000'], // https://yellow-pond-0d37d890f.4.azurestaticapps.net
-  }));
+app.use(cors());
 app.use(express.json());
 
 /* IMPORT MODELS */
@@ -19,11 +19,11 @@ import Stripe from 'stripe'
 /* USER ORDERS INTERACTIONS */
 app.get('/getOrders', async function (req, res) {
     console.log("getOrders route hit")
-    
-    try{
+
+    try {
         const response = await orderModel.getOrders();
         res.json(response);
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching user orders:', error);
     }
 });
@@ -31,11 +31,11 @@ app.get('/getOrders', async function (req, res) {
 app.get('/getUserOrders', async function (req, res) {
     console.log("getUserOrders route hit")
     const user_id = req.query.user_id
-    try{
+    try {
         const result = await orderModel.getUserOrders(user_id);
         console.log(result)
         res.json(result);
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching user orders:', error);
     }
 });
@@ -43,11 +43,11 @@ app.get('/getUserOrders', async function (req, res) {
 app.get('/getOrderItems', async function (req, res) {
     const order_id = req.query.order_id
     console.log("getOrderItems route hit: " + order_id)
-    try{
+    try {
         const result = await orderModel.getUserOrderItems(order_id);
         // console.log(result)
         // res.json(result);
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching user orders:', error);
     }
 });
@@ -55,11 +55,11 @@ app.post('/createUserOrder', async function (req, res) {
     const { user_id, amount } = req.body
 
     console.log("createUserOrder route hit")
-    try{
+    try {
         const result = await orderModel.createOrderdb(user_id, amount);
         console.log(result)
         // res.json(result);
-    } catch (error){
+    } catch (error) {
         console.error('Error creating user orders:', error);
     }
 });
@@ -77,7 +77,7 @@ app.post('/getCart', async function (req, res) {
         const cartResult = await cartModel.getCartdb(id);
         // console.log(cartResult)
         res.json({ cart_items: cartResult.rows });
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching cart items:', error);
     }
 });
@@ -86,12 +86,12 @@ app.post('/addCart', async function (req, res) {
     // acknowledge request received on the console for debugging
     // set values from request
     const { menu_item, cart_id } = req.body;
-    
+
     try {
         // sanitized parameters
         const addItemResult = await cartModel.addCartItemdb(cart_id, menu_item);
         res.json(addItemResult);
-    } catch (error){
+    } catch (error) {
         console.error('Error adding menu item to cart:', error);
     }
 });
@@ -105,9 +105,9 @@ app.post('/removeCartItem', async function (req, res) {
     console.log("Cart Item ID: " + cart_id)
     try {
         // sanitized parameters
-        const removeItemResult = await cartModel.removeCartItemdb(user_id, cart_id, menu_item_id);        
+        const removeItemResult = await cartModel.removeCartItemdb(user_id, cart_id, menu_item_id);
         res.json(removeItemResult);
-    } catch (error){
+    } catch (error) {
         console.error('Error removing menu item from cart:', error);
     }
 });
@@ -118,11 +118,11 @@ app.get('/getMenu', async function (req, res) {
     const category_id = req.query.category_id; // set values from request
     try {
         const menuResult = await menuModel.getMenudb(category_id); // sanitize
-        
+
         if (menuResult.rowCount === 0)
-            return res.status(404).json({ message: 'No menu items found for this category.'});
+            return res.status(404).json({ message: 'No menu items found for this category.' });
         res.json({ items: menuResult });
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching menu items:', error);
     }
 });
@@ -132,11 +132,11 @@ app.get('/getAdminMenu', async function (req, res) {
 
     try {
         const menuResult = await menuModel.getMenudb(category_id, true); // sanitize
-        
+
         if (menuResult.rowCount === 0)
-            return res.status(404).json({ message: 'No menu items found for this category.'});
+            return res.status(404).json({ message: 'No menu items found for this category.' });
         res.json({ items: menuResult });
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching menu items:', error);
     }
 });
@@ -149,14 +149,14 @@ app.post('/deleteMenuItem', async function (req, res) {
 
         const menuResult = await menuModel.getMenudb(0);
         res.json({ success: true, updated_menu: menuResult.rows });
-    } catch (error){
+    } catch (error) {
         res.json({ success: false });
         console.error('Error deleting menu item:', error);
     }
 });
 app.post('/updateMenuItem', async function (req, res) {
     console.log("updateMenuItem route hit!")
-    const {item_id, item_name, desc, price, category, display_img, fav_count} = req.body;
+    const { item_id, item_name, desc, price, category, display_img, fav_count } = req.body;
 
     try {
         await menuModel.editMenuItem(item_id, item_name, price, desc, category, fav_count, display_img);
@@ -170,7 +170,7 @@ app.post('/updateMenuItem', async function (req, res) {
 });
 app.post('/createMenuItem', async function (req, res) {
     console.log("Create menu item route hit!")
-    const {item_name, price, desc, category, fav_count, display_img} = req.body;
+    const { item_name, price, desc, category, fav_count, display_img } = req.body;
 
     try {
         await menuModel.createMenuItem(item_name, price, desc, category, fav_count, display_img);
@@ -190,11 +190,11 @@ app.get('/getFav', async function (req, res) {
     // set values from request
     const user_id = req.query.user_id; // Access query parameter
     try {
-        const favResult = await favModel.getUserFav(user_id); 
+        const favResult = await favModel.getUserFav(user_id);
 
         res.json(favResult);
-        
-    } catch (error){
+
+    } catch (error) {
         console.error('Error fetching cart items:', error);
     }
 });
@@ -206,11 +206,11 @@ app.get('/addFav', async function (req, res) {
     const { user_id, menu_item } = req.query; // Access query parameter
     try {
         // adds to user_favourites table and incr menu item fav_count
-        const addFavResult = await favModel.addUserFav(user_id, menu_item); 
-        
+        const addFavResult = await favModel.addUserFav(user_id, menu_item);
+
         console.log(addFavResult);
         res.json(addFavResult);
-    } catch (error){
+    } catch (error) {
         console.error('Error adding to user favs: ', error);
     }
 });
@@ -223,11 +223,11 @@ app.get('/deleteFav', async function (req, res) {
     console.log(user_id)
     console.log(menu_item)
     try {
-        const deleteFavRes = await favModel.deleteUserFav(user_id, menu_item); 
-        
+        const deleteFavRes = await favModel.deleteUserFav(user_id, menu_item);
+
         console.log(deleteFavRes);
         res.json(deleteFavRes);
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching cart items:', error);
     }
 });
@@ -236,22 +236,23 @@ app.get('/deleteFav', async function (req, res) {
 //make post
 app.get('/getProfile', async function (req, res) {
     const user_id = req.query.user_id; // Access query parameter
-    try{
+    try {
         const response = await userModel.getUserProfile(user_id);
-        res.json(response); 
+        res.json(response);
 
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching users:', error);
     }
 });
+
 //make post
 app.get('/users', async function (req, res) {
 
-    try{
+    try {
         const response = await userModel.getUsers();
-        res.json(response); 
+        res.json(response);
 
-    } catch (error){
+    } catch (error) {
         console.error('Error fetching users:', error);
     }
 });
@@ -261,15 +262,15 @@ app.post('/checkEmail', async function (req, res) {
     try {
         const existingUser = await userModel.checkEmaildb(email);
         res.json({ exists: existingUser.rowCount > 0 });
-      } catch (error) {
+    } catch (error) {
         console.error('Error checking email:', error);
         res.status(500).json({ error: 'Internal server error' });
-      }
+    }
 });
 
 app.post('/updateProfile', async function (req, res) {
     console.log("Update user route hit!")
-    const {user_id, email, phone, username} = req.body;
+    const { user_id, email, phone, username } = req.body;
     try {
         await userModel.editUserdb(user_id, username, email, phone);
         const response = await userModel.getUserProfile(user_id);
@@ -283,10 +284,10 @@ app.post('/updateProfile', async function (req, res) {
 
 app.post('/updateUser', async function (req, res) {
     console.log("Update user route hit!")
-    const {user_id, email, phone, username} = req.body;
+    const { user_id, email, phone, username } = req.body;
     try {
         await userModel.editUserdb(user_id, username, email, phone);
-        
+
         const response = await userModel.getUsers()
         res.json({ success: true, updated_users: response.rows });
     } catch (error) {
@@ -302,10 +303,10 @@ app.post('/deleteUser', async function (req, res) {
         const response = await userModel.getUsers();
 
         res.json({ success: true, users: response.rows });
-      } catch (error) {
+    } catch (error) {
         console.error('Error deleting user:', error);
         res.status(500).json({ error: 'Internal server error' });
-      }
+    }
 });
 
 /* AUTH SERVICES */
@@ -323,7 +324,7 @@ app.post('/signup', async function (req, res) {
         }
     } catch (err) {
         console.error('Error in /signup route:', err);
-        res.status(500).json({ error: 'Failed to create user account'});
+        res.status(500).json({ error: 'Failed to create user account' });
     }
 });
 
@@ -333,19 +334,20 @@ app.post('/login', async function (req, res) {
 
     try {
         const result = await authService.login(email, pwd); // will handle email check and password hashing
-        if (result.success && result.user) {
-            res.status(201).json({ message: result.message, user: result.user });
+        console.log(result)
+        if (result.success) {
+            res.json({ success: true, message: result.message, user: result.user });
         } else {
-            res.status(400).json({ error: result.message });
+            res.json({ success: false, error: result.message });
         }
     } catch (err) {
         console.error('Error in /login route:', err);
-        res.status(500).json({ error: 'Failed to login user'});
+        res.json({ success: false, message: "Error with logging in user." });
     }
 });
 
 /* STRIPE SERVICES */
-const stripe = Stripe('sk_test_51QRpGNKrOstSqbtPugP2r40ZHhmMZtagIK2M7fxa03bujAu51MN0kaGRwWfbmvYgDEd61fZea7fgkuEd9PDuavCT00cdt2vZLP'); // Replace with your secret key
+const stripe = Stripe(process.env.STRIPE_SECRET);
 
 app.post('/create-payment-intent', async (req, res) => {
     console.log("create-payment-intent route hit!");
@@ -361,15 +363,34 @@ app.post('/create-payment-intent', async (req, res) => {
             clientSecret: paymentIntent.client_secret,
         });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create payment intent'});
+        res.status(500).json({ error: 'Failed to create payment intent' });
     }
 });
 
-// start the server
-async function startup()
-{
-  app.listen(3001, async function(){
-  });
-}
+const port = process.env.PORT || 3001; // Default to 3001 if no environment variable is set
 
-startup();
+const server = app.listen(port, async function () {
+    console.log(`Server is running on port ${port}`);
+});
+
+const shutdown = async (signal) => {
+    console.log(`Received ${signal}. Closing server...`);
+    server.close(async (err) => {
+        if (err) {
+            console.error('Error closing server:', err);
+            process.exit(1);
+        }
+        console.log('Server closed. Ending database pool...');
+        try {
+            await pool.end();
+            console.log('Database pool has ended.');
+            process.exit(0);
+        } catch (dbErr) {
+            console.error('Error ending database pool:', dbErr);
+            process.exit(1);
+        }
+    });
+};
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));

@@ -1,21 +1,29 @@
 // config/db.js
 import 'dotenv/config';
 import pg from 'pg'
-const { Client } = pg
+const { Pool } = pg;
 
-const db = new Client({
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'luganodb',
+// Create a connection pool
+const pool = new Pool({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  ssl: { rejectUnauthorized: false },
 });
 
-try {
-  await db.connect();
-  console.log("Connected to psql luganodb");
-} catch (err) {
-  console.error("Database connection error:", err);
-}
 
-export default db;
+// Log successful connection
+pool.on('connect', () => {
+  console.log("Connected to psql luganodb: (" + pool.options.host + ")");
+});
+
+// Handle errors from the pool
+pool.on('error', (err) => {
+  console.error("Unexpected error on idle client", err);
+  process.exit(-1);
+});
+
+// Export the pool object for use in models
+export default pool;
