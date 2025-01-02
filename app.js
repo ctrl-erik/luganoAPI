@@ -1,10 +1,15 @@
 import express from 'express'
 import cors from 'cors'
 import pool from './config/db.js';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
+app.set('trust proxy', 1); // Trust the first proxy
+
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 })); // 100 requests per 15 mins
 app.use(cors());
 app.use(express.json());
+
 
 /* IMPORT MODELS */
 import userModel from './models/userModel.js'
