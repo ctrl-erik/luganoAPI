@@ -21,6 +21,45 @@ import orderModel from './models/orderModel.js'
 import authService from './middleware/authService.js'
 import Stripe from 'stripe'
 
+/* AUTH SERVICES */
+
+app.post('/signup', async function (req, res) {
+    // acknowledge request received on the console for debugging
+    // set values from request
+    const { username, email, phone, pwd } = req.body;
+
+    try {
+        const result = await authService.signUp(username, email, phone, pwd); // will handle email check and password hashing
+        console.log(result)
+        if (result.success) {
+            res.json({ success: true, message: result.message });
+        } else {
+            res.json({ success: false, message: result.message });
+        }
+    } catch (err) {
+        console.error('Error in /signup route:', err);
+        res.status(500).json({ error: 'Failed to create user account' });
+    }
+});
+
+app.post('/login', async function (req, res) {
+    // acknowledge request received on the console for debugging
+    const { email, pwd } = req.body;
+
+    try {
+        const result = await authService.login(email, pwd); // will handle email check and password hashing
+        console.log(result)
+        if (result.success) {
+            res.json({ success: true, message: result.message, user: result.user });
+        } else {
+            res.json({ success: false, error: result.message });
+        }
+    } catch (err) {
+        console.error('Error in /login route:', err);
+        res.json({ success: false, message: "Error with logging in user." });
+    }
+});
+
 /* USER ORDERS INTERACTIONS */
 app.get('/getOrders', async function (req, res) {
     console.log("getOrders route hit")
@@ -311,43 +350,6 @@ app.post('/deleteUser', async function (req, res) {
     } catch (error) {
         console.error('Error deleting user:', error);
         res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-/* AUTH SERVICES */
-app.post('/signup', async function (req, res) {
-    // acknowledge request received on the console for debugging
-    // set values from request
-    const { username, email, phone, pwd } = req.body;
-
-    try {
-        const result = await authService.signUp(username, email, phone, pwd); // will handle email check and password hashing
-        if (result.success) {
-            res.status(201).json({ message: result.message });
-        } else {
-            res.status(400).json({ error: result.message });
-        }
-    } catch (err) {
-        console.error('Error in /signup route:', err);
-        res.status(500).json({ error: 'Failed to create user account' });
-    }
-});
-
-app.post('/login', async function (req, res) {
-    // acknowledge request received on the console for debugging
-    const { email, pwd } = req.body;
-
-    try {
-        const result = await authService.login(email, pwd); // will handle email check and password hashing
-        console.log(result)
-        if (result.success) {
-            res.json({ success: true, message: result.message, user: result.user });
-        } else {
-            res.json({ success: false, error: result.message });
-        }
-    } catch (err) {
-        console.error('Error in /login route:', err);
-        res.json({ success: false, message: "Error with logging in user." });
     }
 });
 
