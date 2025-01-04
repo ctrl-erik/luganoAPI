@@ -1,9 +1,9 @@
 // models/favModel.js
-import db from '../config/db.js';
+import pool from '../config/db.js';
 
 const favModel = {
     async getUserFav(id) {
-        const favResult = await db.query('SELECT menu_item_id FROM user_favourites WHERE user_id = $1', [id])
+        const favResult = await pool.query('SELECT menu_item_id FROM user_favourites WHERE user_id = $1', [id])
 
         if (favResult.data === 0) {
             return res.status(404).json({ message: 'No favourites found for this user.' });
@@ -16,15 +16,15 @@ const favModel = {
             values: [menuItemIds],
         };
 
-        const itemsResult = await db.query(itemsQuery);
+        const itemsResult = await pool.query(itemsQuery);
         return itemsResult;
     },
     async deleteUserFav(user_id, item_id) {
-        const deleteFavResult = await db.query(`DELETE FROM user_favourites
+        const deleteFavResult = await pool.query(`DELETE FROM user_favourites
                                                 WHERE user_id = $1 
                                                 AND menu_item_id = $2`, [user_id, item_id]);
 
-        await db.query(`UPDATE menu_items
+        await pool.query(`UPDATE menu_items
             SET fav_count = fav_count - 1
             WHERE menu_item_id = $1`, [item_id]);
 
@@ -32,10 +32,10 @@ const favModel = {
     },
     async addUserFav(user_id, item_id) {
         try {
-            await db.query(`INSERT INTO user_favourites
+            await pool.query(`INSERT INTO user_favourites
                             VALUES ($1, $2)`, [user_id, item_id]);
 
-            await db.query(`UPDATE menu_items
+            await pool.query(`UPDATE menu_items
                                 SET fav_count = fav_count + 1
                                 WHERE menu_item_id = $1`, [item_id]);
             return {success: true}

@@ -1,14 +1,14 @@
 // models/orderModel.js
-import db from '../config/db.js';
+import pool from '../config/db.js';
 
 const orderModel = {
     async getOrders() {
-        const ordersResult = await db.query('SELECT * FROM orders')
+        const ordersResult = await pool.query('SELECT * FROM orders')
         return ordersResult;
     },
     async getUserOrders(user_id) {
         try {
-            const userOrdersResult = await db.query('SELECT * FROM orders WHERE user_id = $1', [user_id])
+            const userOrdersResult = await pool.query('SELECT * FROM orders WHERE user_id = $1', [user_id])
 
             if (userOrdersResult.data === 0)
                 return { success: false, message: 'No orders found for this user.' };
@@ -22,7 +22,7 @@ const orderModel = {
     },
     async createOrderdb(user_id, amount) {
         try {
-            const userOrdersResult = await db.query(`INSERT INTO orders(user_id, total_cost)
+            const userOrdersResult = await pool.query(`INSERT INTO orders(user_id, total_cost)
                                                     VALUES ($1, $2);`, [user_id, amount])
 
             console.log(userOrdersResult);
@@ -32,7 +32,7 @@ const orderModel = {
     },
     async getUserOrderItems(order_id) {
 
-        const orderItemsResult = await db.query("SELECT mi.name, mi.price, oi.quantity " +
+        const orderItemsResult = await pool.query("SELECT mi.name, mi.price, oi.quantity " +
                                                 "FROM order_item oi " +
                                                 "JOIN menu_items mi ON oi.item_id = mi.menu_item_id " +
                                                 "WHERE oi.order_id = $1 " +

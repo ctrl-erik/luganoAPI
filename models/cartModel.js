@@ -1,16 +1,16 @@
 // models/cartModel.js
-import db from '../config/db.js';
+import pool from '../config/db.js';
 
 const cartModel = {
     async getCartdb(user_id) {
         try {
-            const userCartRes = await db.query('SELECT * FROM carts WHERE user_id = $1', [user_id])
+            const userCartRes = await pool.query('SELECT * FROM carts WHERE user_id = $1', [user_id])
 
             if (userCartRes.data === 0)
                 return { success: false, message: 'No cart found for this user.' };
             // console.log(userCartRes);
             const cartId = userCartRes.rows[0].cart_id;
-            const cartItemsResult = await db.query("SELECT ci.item_id, mi.name, mi.desc, mi.price, ci.quantity " +
+            const cartItemsResult = await pool.query("SELECT ci.item_id, mi.name, mi.desc, mi.price, ci.quantity " +
                                                     "FROM cart_item ci " +
                                                     "JOIN menu_items mi ON ci.item_id = mi.menu_item_id " +
                                                     "WHERE ci.cart_id = $1 " +
@@ -22,7 +22,7 @@ const cartModel = {
     },
     async getCartIddb(user_id) {
         try {
-            const result = await db.query('SELECT cart_id FROM carts WHERE user_id = $1', [user_id])
+            const result = await pool.query('SELECT cart_id FROM carts WHERE user_id = $1', [user_id])
             return result;
         } catch (error){
             console.error('Error fetching user cart id:', error);
@@ -31,7 +31,7 @@ const cartModel = {
     
     async createUserCartdb(userId) {
         try {
-            const response = await db.query('INSERT INTO carts(user_id) VALUES ($1);', [userId])
+            const response = await pool.query('INSERT INTO carts(user_id) VALUES ($1);', [userId])
             return response;
         } catch (error){
             console.error('Error creating user cart:', error);
@@ -48,7 +48,7 @@ const cartModel = {
                 RETURNING *;
             `;
     
-            const result = await db.query(query, [cart_id, menu_item]);
+            const result = await pool.query(query, [cart_id, menu_item]);
             // return result.rows[0]; // Return the updated or inserted row
             return { success: true, message: "Menu item added to cart." };
         } catch (error) {
@@ -70,7 +70,7 @@ const cartModel = {
                 SELECT 1 FROM updated_cart
             )
             RETURNING *`;
-            await db.query(query, [cart_id, menu_item]);
+            await pool.query(query, [cart_id, menu_item]);
             const getResult = await this.getCartdb(user_id);
             return { rows: getResult.rows, success: true, message: "Menu item removed from cart" };
         } catch (error) {
