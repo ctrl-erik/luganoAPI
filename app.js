@@ -380,8 +380,8 @@ app.post('/create-payment-intent', async (req, res) => {
     }
 });
 
-const port = process.env.PORT || 3001; // Default to 3001 if no environment variable is set
-
+const port = process.env.PORT; // || 3001;
+console.log(`Testing on port ${port}...`);
 const server = app.listen(port, async function () {
     console.log(`Server is running on port ${port}`);
 });
