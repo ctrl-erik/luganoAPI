@@ -1,21 +1,10 @@
 import express from 'express'
-import cors from 'cors'
 import pool from './config/db.js';
-import rateLimit from 'express-rate-limit';
 
 const app = express();
-app.set('trust proxy', 1); // Trust the first proxy
-
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 })); // 200 requests per 15 mins
-
-app.use(cors({
-    origin: ['https://yellow-pond-0d37d890f.4.azurestaticapps.net'],
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+app.set('trust proxy', true); // Trust the first proxy
 
 app.use(express.json());
-
 
 /* IMPORT MODELS */
 import userModel from './models/userModel.js'
@@ -50,6 +39,7 @@ app.post('/signup', async function (req, res) {
 
 app.post('/login', async function (req, res) {
     // acknowledge request received on the console for debugging
+    console.log("/login route hit: ", req.body)
     const { email, pwd } = req.body;
 
     try {
@@ -380,7 +370,7 @@ app.post('/create-payment-intent', async (req, res) => {
     }
 });
 
-const port = process.env.PORT; // || 3001;
+const port = process.env.PORT// || 3001;
 console.log(`Testing on port ${port}...`);
 const server = app.listen(port, async function () {
     console.log(`Server is running on port ${port}`);
