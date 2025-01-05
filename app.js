@@ -10,6 +10,8 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 })); // 200 requests per 
 
 app.use(cors({
     origin: ['https://yellow-pond-0d37d890f.4.azurestaticapps.net'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json());
