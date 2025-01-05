@@ -6,8 +6,12 @@ import rateLimit from 'express-rate-limit';
 const app = express();
 app.set('trust proxy', 1); // Trust the first proxy
 
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 })); // 100 requests per 15 mins
-app.use(cors());
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 })); // 200 requests per 15 mins
+
+app.use(cors({
+    origin: ['https://yellow-pond-0d37d890f.4.azurestaticapps.net'],
+}));
+
 app.use(express.json());
 
 
