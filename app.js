@@ -16,6 +16,10 @@ import orderModel from './models/orderModel.js'
 import authService from './middleware/authService.js'
 import Stripe from 'stripe'
 
+app.get('/debug', (req, res) => {
+    res.json({ nodeVersion: process.version, env: process.env });
+});
+
 /* AUTH SERVICES */
 
 app.post('/signup', async function (req, res) {
