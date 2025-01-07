@@ -17,6 +17,7 @@ import authService from './middleware/authService.js'
 import Stripe from 'stripe'
 
 app.get('/debug', (req, res) => {
+    console.log("debug route hit!")
     res.send("Hello World!");
 });
 
